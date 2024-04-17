@@ -1,34 +1,73 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useReducer } from 'react'
+import NumberButton from './NumberButtons';
+import OperationButton from './OperationButtons';
+import "./App.css";
 
+
+// Let's list the actions that our reducer will handle:
+// eslint-disable-next-line react-refresh/only-export-components
+export const ACTIONS  ={
+  ADD_NUMBER: 'add-number',
+  DELETE_NUMBER: 'delete-number',
+  CLEAR: 'clear',
+  ADD_OPERATION: 'add-operation',
+  CALCULATE: 'calculate'
+
+
+}
+//Our reducer which will handle the actions that our calculator will perform
+function reducer(state, { type, payload }) {
+
+  switch(type) { 
+    case ACTIONS.ADD_NUMBER:
+      if(payload.number === "0" && state.currentOperand === "0") {
+        return state;
+      }
+      if(payload.number === "." && state.currentOperand.includes(".")) {
+        return state
+      }
+      
+        return {
+          ...state,
+          currentOperand: `${state.currentOperand || ""}${payload.number}`
+        }
+  }
+}
+
+//Our App component for the calculator
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [{currentOperand, previousOperand, operation}, dispatch] = useReducer(reducer,{});
+
+
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="calculator-grid">
+        <div className="output">
+            <div className="previous-operand">{previousOperand} {operation}</div>
+            <div className="current-operand">{currentOperand}</div>
+        </div>
+        <button className="span-two">C</button>
+        <button>DEL</button>
+        <OperationButton operation="/" dispatch={dispatch}/>
+        <NumberButton number="7" dispatch={dispatch}/>
+        <NumberButton number="8" dispatch={dispatch}/>
+        <NumberButton number="9" dispatch={dispatch}/>
+        <OperationButton operation="*" dispatch={dispatch}/>
+        <NumberButton number="4" dispatch={dispatch}/>
+        <NumberButton number="5" dispatch={dispatch}/>
+        <NumberButton number="6" dispatch={dispatch}/>
+        <OperationButton operation="+" dispatch={dispatch}/>
+        <NumberButton number="1" dispatch={dispatch}/>
+        <NumberButton number="2" dispatch={dispatch}/>
+        <NumberButton number="3" dispatch={dispatch}/>
+        <OperationButton operation="-" dispatch={dispatch}/>
+        <NumberButton number="0" dispatch={dispatch}/>
+        <NumberButton number="." dispatch={dispatch}/>
+        <button className="span-two">=</button>
+
+
+    </div>
   )
 }
 
