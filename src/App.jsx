@@ -27,27 +27,84 @@ function reducer(state, { type, payload }) {
         return state
       }
       
-        return {
+      return {
           ...state,
           currentOperand: `${state.currentOperand || ""}${payload.number}`
+      }
+
+    case ACTIONS.CLEAR:
+      return {} 
+
+    case ACTIONS.ADD_OPERATION:
+      if(state.currentOperand == null && state.previousOperand == null) {
+        return state;
+      }
+
+      if(state.previousOperand == null) {
+        return {
+          ...state,
+          currentOperand: null,
+          previousOperand: state.currentOperand,
+          operation: payload.operation
         }
+      }
+
+      return {
+      ...state,
+      previousOperand: calculate(state),
+      operation: payload.operation,
+      currentOperand: null
+    }
   }
 }
+// The calculate function to calculate the result of the operation when equal is pressed or when a new operation is pressed
+function calculate(state) {
+
+  let result = "";
+  let current = parseFloat(state.currentOperand);
+  let previous = parseFloat(state.previousOperand);
+  if(isNaN(current) || isNaN(previous)) return "";
+  switch(state.operation) {
+    case "+":
+      result = previous + current;
+      break;
+    case "-":
+      result = previous - current;
+      break;
+    case "*":
+      result = previous * current;
+      break;
+    case "/":
+      result = previous / current;
+      break;
+    default:
+      return state;
+  }
+
+  return result.toString();
+ }
 
 //Our App component for the calculator
 function App() {
 
+  //Reducer hook to handle the state of the calculator and the actions
   const [{currentOperand, previousOperand, operation}, dispatch] = useReducer(reducer,{});
 
 
 
   return (
     <div className="calculator-grid">
+      {/* The output div to display the current and previous operands */}
         <div className="output">
             <div className="previous-operand">{previousOperand} {operation}</div>
             <div className="current-operand">{currentOperand}</div>
         </div>
-        <button className="span-two">C</button>
+        {/* The reset button for the calculator */}
+        <button className="span-two"
+        onClick={() => dispatch({ type: ACTIONS.CLEAR })}
+        >
+          C
+        </button>
         <button>DEL</button>
         <OperationButton operation="/" dispatch={dispatch}/>
         <NumberButton number="7" dispatch={dispatch}/>
