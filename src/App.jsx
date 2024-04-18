@@ -80,6 +80,7 @@ function reducer(state, { type, payload }) {
       operation: payload.operation,
       currentOperand: null
       }
+
     case ACTIONS.DELETE_NUMBER:
       if(state.overwrite) {
         return {
@@ -152,6 +153,10 @@ function App() {
 
 
   return (
+    <>
+    <header className='header'>
+      <h1 className='header__title'>A simple React calculator</h1>
+    </header>
     <div className="calculator-grid">
       {/* The output div to display the current and previous operands */}
         <div className="output">
@@ -192,6 +197,7 @@ function App() {
 
 
     </div>
+    </>
   )
 }
 
