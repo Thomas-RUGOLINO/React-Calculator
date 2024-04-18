@@ -19,14 +19,21 @@ export const ACTIONS  ={
 function reducer(state, { type, payload }) {
 
   switch(type) { 
+
     case ACTIONS.ADD_NUMBER:
+      if(state.overwrite) {
+        return {
+          ...state,
+          currentOperand: payload.number,
+          overwrite: false
+        }
+      }
       if(payload.number === "0" && state.currentOperand === "0") {
         return state;
       }
       if(payload.number === "." && state.currentOperand.includes(".")) {
         return state
       }
-      
       return {
           ...state,
           currentOperand: `${state.currentOperand || ""}${payload.number}`
@@ -35,9 +42,28 @@ function reducer(state, { type, payload }) {
     case ACTIONS.CLEAR:
       return {} 
 
+    case ACTIONS.CALCULATE:
+      if(state.currentOperand == null || state.previousOperand == null || state.operation == null) {
+        return state;
+      }
+      return {
+        ...state,
+        overwrite: true,
+        currentOperand: calculate(state),
+        previousOperand: null,
+        operation: null
+      }
+
     case ACTIONS.ADD_OPERATION:
       if(state.currentOperand == null && state.previousOperand == null) {
         return state;
+      }
+
+      if(state.currentOperand == null) {
+        return {
+          ...state,
+          operation: payload.operation
+        }
       }
 
       if(state.previousOperand == null) {
@@ -48,13 +74,33 @@ function reducer(state, { type, payload }) {
           operation: payload.operation
         }
       }
-
       return {
       ...state,
       previousOperand: calculate(state),
       operation: payload.operation,
       currentOperand: null
-    }
+      }
+    case ACTIONS.DELETE_NUMBER:
+      if(state.overwrite) {
+        return {
+          ...state,
+          overwrite: false,
+          currentOperand: null
+        }
+      }
+      if(state.currentOperand == null) {
+        return state;
+      }
+      if(state.currentOperand.length === 1) {
+        return {
+          ...state,
+          currentOperand: null
+        }
+      }
+      return {
+        ...state,
+        currentOperand: state.currentOperand.slice(0, -1)
+      }
   }
 }
 // The calculate function to calculate the result of the operation when equal is pressed or when a new operation is pressed
@@ -83,6 +129,19 @@ function calculate(state) {
 
   return result.toString();
  }
+//The integer formatter to format the result of the operation
+ const INTEGER_FORMATTER = new Intl.NumberFormat('fr-FR', {
+  maximumFractionDigits: 0
+});
+
+//The formatOperand function to format the operands in the output div
+function  formatOperand(operand) {
+if (operand == null) return 
+const [integer, decimal] = operand.split(".");
+if (decimal == null) return INTEGER_FORMATTER.format(integer);
+return `${INTEGER_FORMATTER.format(integer)}.${decimal}`;
+
+}
 
 //Our App component for the calculator
 function App() {
@@ -96,8 +155,8 @@ function App() {
     <div className="calculator-grid">
       {/* The output div to display the current and previous operands */}
         <div className="output">
-            <div className="previous-operand">{previousOperand} {operation}</div>
-            <div className="current-operand">{currentOperand}</div>
+            <div className="previous-operand">{formatOperand(previousOperand)} {operation}</div>
+            <div className="current-operand">{formatOperand(currentOperand)}</div>
         </div>
         {/* The reset button for the calculator */}
         <button className="span-two"
@@ -105,7 +164,11 @@ function App() {
         >
           C
         </button>
-        <button>DEL</button>
+        <button
+        onClick={() => dispatch({ type: ACTIONS.DELETE_NUMBER })}
+        >
+          DEL
+        </button>
         <OperationButton operation="/" dispatch={dispatch}/>
         <NumberButton number="7" dispatch={dispatch}/>
         <NumberButton number="8" dispatch={dispatch}/>
@@ -121,7 +184,11 @@ function App() {
         <OperationButton operation="-" dispatch={dispatch}/>
         <NumberButton number="0" dispatch={dispatch}/>
         <NumberButton number="." dispatch={dispatch}/>
-        <button className="span-two">=</button>
+        <button className="span-two"
+        onClick={() => dispatch({ type: ACTIONS.CALCULATE })}
+        >
+          =
+        </button>
 
 
     </div>
