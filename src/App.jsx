@@ -155,7 +155,7 @@ function App() {
   return (
     <>
     <header className='header'>
-      <h1 className='header__title'>A simple React calculator</h1>
+      <h1 className='header-title'>A simple React calculator</h1>
     </header>
     <div className="calculator-grid">
       {/* The output div to display the current and previous operands */}
@@ -164,7 +164,7 @@ function App() {
             <div className="current-operand">{formatOperand(currentOperand)}</div>
         </div>
         {/* The reset button for the calculator */}
-        <button className="span-two"
+        <button className="span-two reset-button"
         onClick={() => dispatch({ type: ACTIONS.CLEAR })}
         >
           C
